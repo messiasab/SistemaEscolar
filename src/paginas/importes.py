@@ -2,22 +2,23 @@
 import flet as ft
 from pathlib import Path
 from model.mongodb_importer import import_data_to_mongodb
-from model.collections import Alunos, Notas, Contatos, Atestados, Ocorrencias
 
-def Importes(page):
+from model.colecao import AlunosM, NotasM, ContatosM, AtestadosM, OcorrenciasM
+
+def Importes_v(page):
     file_path = None
-    selected_collection_class = Alunos  # Valor padrão para a coleção
+    selected_collection_class = AlunosM  # Valor padrão para a coleção
 
     # Função para lidar com a seleção do Dropdown
     def on_collection_change(e):
         nonlocal selected_collection_class
         collection_name = e.control.value
         selected_collection_class = {
-            "Alunos": Alunos,
-            "Notas": Notas,
-            "Contatos": Contatos,
-            "Atestados": Atestados,
-            "Ocorrencias": Ocorrencias,
+            "Alunos": AlunosM,
+            "Notas": NotasM,
+            "Contatos": ContatosM,
+            "Atestados": AtestadosM,
+            "Ocorrencias": OcorrenciasM,
         }[collection_name]
         status.value = f"Coleção selecionada: {collection_name}"
         status.color = "blue"

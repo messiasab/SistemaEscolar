@@ -2,7 +2,7 @@ import flet as ft
 
 
 
-def Casa(page):
+def Casa_v(page):
      # Função para criar os itens do Row
     def items():
         items_list = [ft.Card(
@@ -55,13 +55,13 @@ def Casa(page):
                                 [
                                     ft.ListTile(
                                         leading=ft.Icon(ft.Icons.ALBUM),
-                                        title=ft.Text("Documentos"),
+                                        title=ft.Text("Atestados"),
                                         subtitle=ft.Text(
                                             "Nesta pagina podem ser emitidos os documentos escolares."
                                         ),
                                     ),
                                     ft.Row(
-                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/docs")),],
+                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/atestadot")),],
                                         alignment=ft.MainAxisAlignment.END,
                                     ),
                                 ]
@@ -83,7 +83,7 @@ def Casa(page):
                                         ),
                                     ),
                                     ft.Row(
-                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/qru")),],
+                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/ocorenciast")),],
                                         alignment=ft.MainAxisAlignment.END,
                                     ),
                                 ]
@@ -136,7 +136,33 @@ def Casa(page):
                             padding=10,
                         )
 
-                    ),]
+                    ),
+
+                    ft.Card(
+                            content=ft.Container(
+                            content=ft.Column(
+                                [
+                                    ft.ListTile(
+                                        leading=ft.Icon(ft.Icons.ALBUM),
+                                        title=ft.Text("usuarios"),
+                                        subtitle=ft.Text(
+                                            "Nesta pagina são emitidos os hitóricos escolates."
+                                        ),
+                                    ),
+                                    ft.Row(
+                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/usuarios")),],
+                                        alignment=ft.MainAxisAlignment.END,
+                                    ),
+                                ]
+                            ),
+                            width=400,
+                            padding=10,
+                        )
+
+                    ),
+                    
+                    
+                    ]
         
         return items_list
 

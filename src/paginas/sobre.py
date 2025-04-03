@@ -2,7 +2,7 @@ import flet as ft
 
 
 # Função para criar o conteúdo da página "Sobre"
-def Sobre(page):
+def Sobre_v(page):
     
     return ft.Column(
         [
