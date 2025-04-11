@@ -8,11 +8,13 @@ class AtestadosView():
         self.atestados_db = AtestadosM()
 
         # Recupera o ID do aluno da sessão
-        self.aluno_id = self.page.session.get("aluno_id")
+        self.aluno_id = self.page.session.get("aluno_selecionado")
         if not self.aluno_id:
-            self.page.snack_bar.open = ft.SnackBar(ft.Text("Nenhum aluno selecionado."), bgcolor=ft.colors.RED)
+            self.page.open(ft.SnackBar(ft.Text("Nenhum aluno selecionado."), bgcolor=ft.colors.RED))
             self.page.update()
             return
+        else:
+            self.aluno_nome = self.aluno_id["Nome"]
 
         # Controles da interface
         self.tipo_dropdown = ft.Dropdown(
@@ -23,7 +25,7 @@ class AtestadosView():
                 ft.dropdown.Option("Restrição Alimentar"),
             ],
         )
-        self.data_input = ft.TextField(label="Data", hint_text="DD/MM/AAAA")
+        self.data_input = ft.TextField(label="Data", hint_text="DD/MM/AAAA",on_change=self.formatar_data)
         self.numero_dias = ft.TextField(label="Número de Dias", keyboard_type=ft.KeyboardType.NUMBER)
         self.conteudo = ft.TextField(label="Conteúdo", multiline=True)
         self.cid = ft.TextField(label="CID")
@@ -47,7 +49,7 @@ class AtestadosView():
 
     def build(self):
         return ft.Column([
-            ft.Text("Formulário de Atestado", size=24, weight=ft.FontWeight.BOLD),
+            ft.Text(f"Formulário Registo de  Atestado para: {self.aluno_nome}", size=24, weight=ft.FontWeight.BOLD),
             self.tipo_dropdown,
             self.data_input,
             self.numero_dias,
@@ -68,8 +70,8 @@ class AtestadosView():
         Salva ou atualiza um atestado no banco de dados.
         """
         if not self.tipo_dropdown.value or not self.data_input.value or not self.numero_dias.value:
-            self.page.snack_bar = ft.SnackBar(ft.Text("Preencha todos os campos obrigatórios."), bgcolor=ft.colors.RED)
-            self.page.snack_bar.open = True
+            self.page.open(ft.SnackBar(ft.Text("Preencha todos os campos obrigatórios."), bgcolor=ft.colors.RED)) 
+            
             self.page.update()
             return
 
@@ -87,15 +89,15 @@ class AtestadosView():
             query = {"_id": self.editando_id}
             modificados = self.atestados_db.atualiza(query=query, update_data=atestado_data)
             if modificados > 0:
-                self.page.snack_bar = ft.SnackBar(ft.Text("Atestado atualizado com sucesso!"), bgcolor=ft.colors.GREEN)
+                self.page.open(ft.SnackBar(ft.Text("Atestado atualizado com sucesso!"), bgcolor=ft.colors.GREEN))  
             else:
-                self.page.snack_bar = ft.SnackBar(ft.Text("Erro ao atualizar o atestado."), bgcolor=ft.colors.RED)
+                self.page.open(ft.SnackBar(ft.Text("Erro ao atualizar o atestado."), bgcolor=ft.colors.RED)) 
         else:  # Se estiver criando um novo atestado
             resultado = self.atestados_db.create_with_aluno_id(self.aluno_id, atestado_data)
             if resultado:
-                self.page.snack_bar = ft.SnackBar(ft.Text("Atestado salvo com sucesso!"), bgcolor=ft.colors.GREEN)
+                self.page.open(ft.SnackBar(ft.Text("Atestado salvo com sucesso!"), bgcolor=ft.colors.GREEN)) 
             else:
-                self.page.snack_bar = ft.SnackBar(ft.Text("Erro ao salvar o atestado."), bgcolor=ft.colors.RED)
+                self.page.open(ft.SnackBar(ft.Text("Erro ao salvar o atestado."), bgcolor=ft.colors.RED)) 
 
         self.limpar_formulario()
         self.carregar_atestados()  # Atualiza a lista de atestados
@@ -191,3 +193,18 @@ class AtestadosView():
         self.cid.value = ""
         self.observacao.value = ""
         self.page.update()
+
+    def formatar_data(self, e):
+        """
+        Formata o valor do campo de data no formato DD/MM/AAAA enquanto o usuário digita.
+        """
+        valor = e.control.value
+        valor = ''.join(filter(str.isdigit, valor))  # Remove caracteres não numéricos
+
+        if len(valor) > 2:
+            valor = f"{valor[:2]}/{valor[2:]}"
+        if len(valor) > 5:
+            valor = f"{valor[:5]}/{valor[5:]}"
+        
+        e.control.value = valor
+        e.control.update()

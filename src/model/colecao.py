@@ -92,12 +92,26 @@ class BaseCollection:
         query["aluno_id"] = aluno_id  # Filtra pelo aluno_id
         result = self.collection.delete_many(query)
         return result.deleted_count
+    
+    def get_campos(self):
+        """Retorna as chaves (campos) do primeiro documento na coleção."""
+        documento = self.collection.find_one()  # Busca o primeiro documento
+        if documento:
+            return list(documento.keys())  # Retorna as chaves como uma lista
+        else:
+            return []  # Retorna uma lista vazia se a coleção estiver vazia
 
 class AlunosM(BaseCollection):
     def __init__(self):
-        super().__init__("alunos")
-
-
+        super().__init__("Alunos")
+        self.campos = ['_id', 'EOL', 'RA_Prodesp', 'Codigo_INEP', 'Nº', 'Nome', 'Filiação', 'Data_Nascimento', 'Data_Matrícula', 'Situação', 'Origem', 'Série', 'TEG', 'Turma', 'Periodo','Ensino']
+    def drops(self):
+        
+        """
+        Remove todos os documentos da coleção.
+        """
+        return self.collection.delete_many({})  # Remove todos os documentos
+        
 class NotasM(BaseCollection):
     def __init__(self):
         super().__init__("Notas")
@@ -106,17 +120,17 @@ class NotasM(BaseCollection):
 class ContatosM(BaseCollection):
     def __init__(self):
         super().__init__("Contatos")
-
+        self.campos=['_id', 'nome', 'telefone', 'telefone_whatsapp', 'mail', 'link_redes', 'aluno_id']
 
 class AtestadosM(BaseCollection):
     def __init__(self):
         super().__init__("Atestados")
-
+        self.campos=['_id', 'tipo', 'data', 'numero_dias', 'conteudo', 'cid', 'observacao', 'aluno_id']
 
 class OcorrenciasM(BaseCollection):
     def __init__(self):
         super().__init__("Ocorrencias")
-
+        self.campos=['_id', 'nome_responsavel', 'telefone', 'responsavel_registro', 'rf_registro', 'data', 'relato', 'estrategia', 'encaminhamento', 'aluno_id']
     def create_with_aluno_id(self, aluno_id: str, data: Dict) -> str:
         """
         Insere uma nova ocorrência associada a um aluno específico.
@@ -128,10 +142,10 @@ class OcorrenciasM(BaseCollection):
 class RegistrosM(BaseCollection):
     def __init__(self):
         super().__init__("Registros")
-
+        self.campos=""" ['_id', 'tipo', 'nome_responsavel', 'data', 'acao_realizada', 'observacao', 'aluno_id'] """
 
 class UsuariosM(BaseCollection):
     def __init__(self):
         super().__init__("Usuarios")        
-
+        self.campos=""" ['_id', 'nome', 'rf', 'email', 'senha', 'tipo'] """
 

@@ -6,11 +6,7 @@ def LoginView(page):
     # Instância do banco de dados
     usuarios_db = UsuariosM()
 
-    # Controles da interface
-    usuario = ft.TextField(label="Usuário", autofocus=True)
-    senha = ft.TextField(label="Senha", password=True, can_reveal_password=True)
-    mensagem = ft.Text("", size=14, color=ft.colors.RED)
-
+    # Função para autenticar o usuário
     def autenticar_usuario(e):
         """
         Verifica se as credenciais fornecidas são válidas.
@@ -36,7 +32,7 @@ def LoginView(page):
                 # Credenciais válidas: Redireciona para a tela principal
                 mensagem.value = ""
                 page.session.set("usuario_logado", usuario_encontrado[0])  # Armazena o usuário logado na sessão
-                page.go("/home")  # Redireciona para a tela principal
+                page.go("/")  # Redireciona para a tela principal
             else:
                 # Senha inválida
                 mensagem.value = "Usuário ou senha incorretos."
@@ -45,6 +41,11 @@ def LoginView(page):
             # Usuário não encontrado
             mensagem.value = "Usuário ou senha incorretos."
             page.update()
+
+    # Controles da interface
+    usuario = ft.TextField(label="Usuário", autofocus=True)
+    senha = ft.TextField(label="Senha", password=True, can_reveal_password=True, on_submit=autenticar_usuario)
+    mensagem = ft.Text("", size=14, color=ft.colors.RED)
 
     # Botão "Entrar"
     entrar_button = ft.ElevatedButton("Entrar", on_click=autenticar_usuario)

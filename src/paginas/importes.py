@@ -2,8 +2,7 @@
 import flet as ft
 from pathlib import Path
 from model.mongodb_importer import import_data_to_mongodb
-
-from model.colecao import AlunosM, NotasM, ContatosM, AtestadosM, OcorrenciasM
+from model.colecao import AlunosM, NotasM, ContatosM, AtestadosM, OcorrenciasM, UsuariosM
 
 def Importes_v(page):
     file_path = None
@@ -13,16 +12,27 @@ def Importes_v(page):
     def on_collection_change(e):
         nonlocal selected_collection_class
         collection_name = e.control.value
+
+        # Mapeia o nome da coleção para a classe correspondente
         selected_collection_class = {
             "Alunos": AlunosM,
             "Notas": NotasM,
             "Contatos": ContatosM,
             "Atestados": AtestadosM,
             "Ocorrencias": OcorrenciasM,
+            "Usuarios": UsuariosM,
         }[collection_name]
-        status.value = f"Coleção selecionada: {collection_name}"
-        status.color = "blue"
-        status.update()
+
+        # Instancia a classe da coleção selecionada
+        collection_instance = selected_collection_class()
+        print(f"Classe selecionada: {collection_instance.__class__.__name__}")
+        print(f"campos: {collection_instance.campos}")
+        # Obtém os campos da coleção (supondo que a classe tenha um método ou atributo `get_campos`)
+        campos = collection_instance.campos # Ajuste conforme a implementação da classe
+        print(f"Campos da coleção {collection_name}: {campos}")
+        # Atualiza o texto do modelo com os campos da coleção selecionada
+        modelo.value = f"Modelo de colunas: {campos}"
+        modelo.update()
 
     # Função para selecionar o arquivo
     def pick_file(e: ft.FilePickerResultEvent):
@@ -74,6 +84,7 @@ def Importes_v(page):
             ft.dropdown.Option("Contatos"),
             ft.dropdown.Option("Atestados"),
             ft.dropdown.Option("Ocorrencias"),
+            ft.dropdown.Option("Usuarios"),
         ],
         value="Alunos",  # Valor padrão
         on_change=on_collection_change,
@@ -81,13 +92,14 @@ def Importes_v(page):
 
     import_button = ft.ElevatedButton("Importar Dados", on_click=import_data)
     status = ft.Text("", size=16)
-
+    modelo = ft.Text(f"Modelo de colunas: ", size=16)  # Inicializa o texto do modelo
     page.overlay.append(file_picker)
 
     return ft.Column(
         [
             ft.Text("Importador de Planilha para MongoDB", size=24, weight="bold"),
             collection_dropdown,  # Adiciona o Dropdown à interface
+            modelo,
             file_name,
             ft.ElevatedButton("Selecionar Planilha", on_click=lambda _: file_picker.pick_files(allow_multiple=False)),
             import_button,

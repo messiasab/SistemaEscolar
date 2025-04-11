@@ -1,7 +1,7 @@
 import flet as ft
 from model.colecao import RegistrosM
 
-class RegistroTelefonicoView():
+class RegistroTelefonicoView:
     def __init__(self, page):
         super().__init__()
         self.page = page
@@ -27,7 +27,11 @@ class RegistroTelefonicoView():
             ],
         )
         self.nome_responsavel = ft.TextField(label="Nome do Responsável")
-        self.data_input = ft.TextField(label="Data", hint_text="DD/MM/AAAA")
+        self.data_input = ft.TextField(
+            label="Data",
+            hint_text="DD/MM/AAAA",
+            on_change=self.formatar_data,  # Evento para formatar a data
+        )
         self.acao_realizada = ft.TextField(label="Ação Realizada", multiline=True)
         self.observacao = ft.TextField(label="Observação", multiline=True)
 
@@ -188,3 +192,18 @@ class RegistroTelefonicoView():
         self.acao_realizada.value = ""
         self.observacao.value = ""
         self.page.update()
+
+    def formatar_data(self, e):
+        """
+        Formata o valor do campo de data no formato DD/MM/AAAA enquanto o usuário digita.
+        """
+        valor = e.control.value
+        valor = ''.join(filter(str.isdigit, valor))  # Remove caracteres não numéricos
+
+        if len(valor) > 2:
+            valor = f"{valor[:2]}/{valor[2:]}"
+        if len(valor) > 5:
+            valor = f"{valor[:5]}/{valor[5:]}"
+        
+        e.control.value = valor
+        e.control.update()

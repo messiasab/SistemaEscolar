@@ -1,16 +1,18 @@
 import flet as ft
-#from paginas.aluno_v import AlunosView
-from paginas.contatos_v import ContatosView
+
+from paginas.aluno_v import AlunosView
 from paginas.atestado_v import AtestadosView
+from paginas.contatos_v import ContatosView
+from paginas.documentos_v import DocumentosView
 from paginas.ocorrencias_v import OcorrenciasView
 from paginas.registros_v import RegistroTelefonicoView
-from paginas.aluno_v import Alunos_v
+from paginas.contatos_v import ContatosM
+
 from model import AlunosM
 
-class AlunosView:
+class HomeView:
     def __init__(self, page):
         self.page = page
-        self.alunos_db = AlunosM()
         self.content_area = ft.Column(
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -65,26 +67,40 @@ class AlunosView:
     def update_content(self, e):
         index = e.control.selected_index
         self.content_area.controls.clear()
+
         if index == 0:
-            self.content_area.controls.append(Alunos_v(self.page))
+            # Instanciar e chamar a classe AlunosView para busca
+            alunos_view = AlunosView(self.page)
+            self.content_area.controls.append(alunos_view.build())
         elif index == 1:
-            
-            self.content_area.controls.append(ft.Text('teste'))
+            # Instanciar e chamar a classe AlunosView para inserção de novos alunos
+            alunos_view = AlunosView(self.page)
+            self.content_area.controls.append(alunos_view.build_new_aluno_form())
         elif index == 2:
-            contato= ContatosView()
-            self.content_area.controls.append(contato.)    
+            # Página de contatos
+            contato = ContatosView(self.page)
+            self.content_area.controls.append(verificar_aluno_selecionado(self.page, contato))
         elif index == 3:
-            ocorrencias=OcorrenciasView()
-            self.content_area.controls.append(ocorrencias.create_view())
+            # Documentos
+            documentos = DocumentosView(self.page)
+            self.content_area.controls.append(verificar_aluno_selecionado(self.page, documentos))
         elif index == 4:
-            atestado= AtestadosView(self.page)
-            self.content_area.controls.append(atestado.build())    
+            # Página de atestados
+            atestado = AtestadosView(self.page)
+            self.content_area.controls.append(verificar_aluno_selecionado(self.page, atestado))
         elif index == 5:
-            ocorrencia= OcorrenciasView(self.page)
-            self.content_area.controls.append(ocorrencia.build())     
+            # Outra página de ocorrências
+            ocorrencia = OcorrenciasView(self.page)
+            self.content_area.controls.append(verificar_aluno_selecionado(self.page, ocorrencia))
         elif index == 6:
-            registro= RegistroTelefonicoView(self.page)
-            self.content_area.controls.append(registro.build())    
+            # Página de registro telefônico
+            registro = RegistroTelefonicoView(self.page)
+            self.content_area.controls.append(verificar_aluno_selecionado(self.page, registro))
+        else:
+             # Instanciar e chamar a classe AlunosView para busca
+            alunos_view = AlunosView(self.page)
+            self.content_area.controls.append(alunos_view.build())
+            
         self.page.update()
 
     def create_view(self):
@@ -100,4 +116,16 @@ class AlunosView:
                 ft.Column([self.content_area], expand=True, alignment=ft.MainAxisAlignment.CENTER),
             ],
             expand=True,  # Faz o Row ocupar todo o espaço disponível
+        )
+
+def verificar_aluno_selecionado(page, componente):
+    """Verifica se há um aluno selecionado na sessão e retorna o conteúdo apropriado."""
+    aluno_selecionado = page.session.get("aluno_selecionado")
+    if aluno_selecionado:
+        return componente.build()
+    else:
+        return ft.Text(
+            "Nenhum aluno selecionado. Por favor, selecione um aluno.",
+            style="headlineMedium",
+            color=ft.colors.RED,
         )

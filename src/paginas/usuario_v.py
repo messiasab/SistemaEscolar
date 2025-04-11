@@ -6,6 +6,15 @@ def UsuariosView(page):
     # Instância do banco de dados
     usuarios_db = UsuariosM()
 
+    if not page.session.get("usuario_logado"):
+        page.go("/login")
+        return
+    if page.session.get("usuario_logado")["tipo"] != "Administrador":
+        page.open(ft.SnackBar(ft.Text("Acesso negado!"), bgcolor=ft.colors.RED))
+        page.update()
+        # Se o usuário não for administrador, redireciona para a página inicial
+        page.go("/")
+        return
     # Controles da interface
     nome = ft.TextField(label="Nome")
     rf = ft.TextField(label="RF", keyboard_type=ft.KeyboardType.NUMBER)
@@ -21,6 +30,7 @@ def UsuariosView(page):
         autofocus=True,
         options=[
             ft.dropdown.Option("Professor"),
+            ft.dropdown.Option("Secretario"),
             ft.dropdown.Option("Coordenador"),
             ft.dropdown.Option("Diretor"),
             ft.dropdown.Option("Administrador"),

@@ -17,7 +17,7 @@ def Casa_v(page):
                                         ),
                                     ),
                                     ft.Row(
-                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/alunos")),],
+                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/home")),],
                                         alignment=ft.MainAxisAlignment.END,
                                     ),
                                 ]
@@ -146,7 +146,7 @@ def Casa_v(page):
                                         leading=ft.Icon(ft.Icons.ALBUM),
                                         title=ft.Text("usuarios"),
                                         subtitle=ft.Text(
-                                            "Nesta pagina são emitidos os hitóricos escolates."
+                                            "Nesta pagina são cadastrados os usuarioa do sistema."
                                         ),
                                     ),
                                     ft.Row(
