@@ -1,5 +1,21 @@
 import flet as ft
-from paginas import LoginView, Casa_v, Sobre_v, Importes_v, AtestadoViewT, OcorrenciasTotaisView, UsuariosView, AlunosView
+from paginas import (
+    LoginView,
+    Casa_v,
+    Sobre_v,
+    Importes_v,
+    AtestadosView,
+    OcorrenciasView,
+    DocumentosView,
+    RegistroTelefonicoView,
+    ContatosView,
+    UsuariosView,
+    AtestadoViewT,
+    OcorrenciasTotaisView,
+    AlunosView,
+    HistoricoView,
+    Config,
+)
 from paginas.home_v import HomeView
 from model.relat import Relat  # Certifique-se de importar a classe Relat corretamente
 
@@ -37,6 +53,10 @@ def main(page: ft.Page):
             main_content.content = OcorrenciasTotaisView(page)
         elif route == "/usuarios":
             main_content.content = UsuariosView(page)    
+        elif route == "/histo":
+            main_content.content = HistoricoView(page).build()  # Chama a função build() da classe HistoricoView.
+        elif route == "/config":
+            main_content.content = Config(page).build()
         else:
             main_content.content = ft.Text("Página não encontrada.", size=20, color=ft.Colors.RED)
 
@@ -67,7 +87,7 @@ def main(page: ft.Page):
                         ft.PopupMenuItem(),  # divider
                         ft.PopupMenuItem(text="Contatos"),
                         ft.PopupMenuItem(),  # divider
-                        ft.PopupMenuItem(text="Históricos"),
+                        ft.PopupMenuItem(text="Históricos",on_click=lambda _: page.go("/histo")),
                         ft.PopupMenuItem(),  # divider
                         ft.PopupMenuItem(text="Importações", on_click=lambda _: page.go("/import")),
                         ft.PopupMenuItem(),  # divider

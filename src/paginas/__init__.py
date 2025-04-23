@@ -13,7 +13,8 @@ from .ocorrencias_totais_vp import OcorrenciasTotaisView
 from .login_vp import LoginView
 from .contatos_v import ContatosM
 from .aluno_v import AlunosView 
-
+from .historico_v import HistoricoView
+from .config import Config
 __all__ = [
     "Casa_v",
     "Sobre_v",
@@ -28,7 +29,9 @@ __all__ = [
     "AtestadoViewT",
     "OcorrenciasTotaisView",
     "LoginView",
-    "AlunosView"
+    "AlunosView",
+    "HistoricoView",
+    "Config",
 ]
 
 __ihome__ = [

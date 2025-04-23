@@ -20,8 +20,15 @@ class DocumentosView:
                 horario = "13:00 às 18:00"
             elif aluno_selecionado['Período']== "Noite":
                 horario = "19:00 às 23:00"
+            from dateutil.relativedelta import relativedelta
 
-            edata_hoje = {"D_hoje" : str(datetime.now().strftime("%d de %B de %Y")), "D_ano" : str(datetime.now().strftime("%Y")), "D_hororio" : str(horario)}
+            # Data atual
+            data_atual = datetime.now()
+
+            # Subtrai 1 mês
+            data_um_mes_atras = data_atual - relativedelta(months=1)
+            edata_hoje = {"D_hoje" : str(datetime.now().strftime("%d de %B de %Y")), "D_ano" : str(datetime.now().strftime("%Y")), "D_hororio" : str(horario), "D_exmes" : str(data_um_mes_atras.strftime("%B"))}
+            
             print(type(aluno_selecionado))
             print(aluno_selecionado)
            
@@ -53,12 +60,11 @@ class DocumentosView:
     def gerar_frequencia(self, e):
         """Gera a declaração de frequência."""
         print("Gerando declaração de frequência...")
+        matri=RelatFrequencia(self.page)
+        matri.salvar_relatorio(self.dados)
 
-
-    def gerar_transferencia(self, e):
-        """Gera a declaração de transferência."""
-        print("Gerando declaração de transferência...")
-
+    
+        
 
     def gerar_metricula(self, e):
         """Gera a declaração de matrícula."""
@@ -79,7 +85,7 @@ class DocumentosView:
                     style="headlineMedium",
                 ),
                 ft.FilledButton("Delaração de Frequencia", on_click=self.gerar_frequencia),
-                ft.FilledButton("Declaração de Transferência", on_click=self.gerar_transferencia),
+               
                 ft.FilledButton("Declaração de Matrícula", on_click=self.gerar_metricula),
                 
                

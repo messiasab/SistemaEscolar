@@ -27,28 +27,7 @@ def Casa_v(page):
                         )
 
                     ),
-                    ft.Card(
-                            content=ft.Container(
-                            content=ft.Column(
-                                [
-                                    ft.ListTile(
-                                        leading=ft.Icon(ft.Icons.ALBUM),
-                                        title=ft.Text("Contatos"),
-                                        subtitle=ft.Text(
-                                            "Nesta pagina pode ser registrado os contatos realizados com os responsavei."
-                                        ),
-                                    ),
-                                    ft.Row(
-                                        [  ft.ElevatedButton("Entrar", on_click=lambda _: page.go("/contatos")),],
-                                        alignment=ft.MainAxisAlignment.END,
-                                    ),
-                                ]
-                            ),
-                            width=400,
-                            padding=10,
-                        )
-
-                    ),
+                    
                     ft.Card(
                             content=ft.Container(
                             content=ft.Column(

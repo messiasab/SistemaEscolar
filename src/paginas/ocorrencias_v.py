@@ -164,7 +164,7 @@ class OcorrenciasView:
             }
 
             # Salva a nova ocorrência no banco de dados
-            resultado = self.ocorrencias_db.create_with_aluno_id(self.aluno_id, ocorrencia_data)
+            resultado = self.ocorrencias_db.cria(self.aluno_id, ocorrencia_data)
             if resultado:
                 self.page.open(ft.SnackBar(ft.Text("Ocorrência salva com sucesso!"), bgcolor=ft.Colors.GREEN))
             else:

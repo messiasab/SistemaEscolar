@@ -93,7 +93,7 @@ class AtestadosView():
             else:
                 self.page.open(ft.SnackBar(ft.Text("Erro ao atualizar o atestado."), bgcolor=ft.colors.RED)) 
         else:  # Se estiver criando um novo atestado
-            resultado = self.atestados_db.create_with_aluno_id(self.aluno_id, atestado_data)
+            resultado = self.atestados_db.cria(self.aluno_id, atestado_data)
             if resultado:
                 self.page.open(ft.SnackBar(ft.Text("Atestado salvo com sucesso!"), bgcolor=ft.colors.GREEN)) 
             else:
@@ -101,7 +101,7 @@ class AtestadosView():
 
         self.limpar_formulario()
         self.carregar_atestados()  # Atualiza a lista de atestados
-        self.page.snack_bar.open = True
+       
         self.page.update()
 
     def carregar_atestados(self):

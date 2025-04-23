@@ -17,7 +17,7 @@ class Relat:
         Solicita o local para salvar o relatório e gera o arquivo.
         """
         self.report_data = report_data
-        self.file_picker.save_file(dialog_title="Salvar Relatório", file_name="relatorio_gerado.docx")
+        self.file_picker.save_file(dialog_title="Salvar Relatório", file_name=f"Relatorio_{report_data["D_Nome"]}.docx")
 
     def on_file_picker_result(self, e):
         """
@@ -71,8 +71,8 @@ class RelatFrequencia(Relat):
     def __init__(self, page):
         super().__init__(page)
         self.documento = Document()
-        self.template_path = "SistemaEscolar/docs/DECLARA_matricula.docx"
-        self.output_path = "SistemaEscolar/src/model/ModeloOcorrencia.docx"
+        self.template_path = "SistemaEscolar/docs/DECLARA_FREQUENCIA.docx"
+        self.output_path = ""
 
 
 class RelatOcorrencia(Relat):

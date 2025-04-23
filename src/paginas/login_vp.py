@@ -8,6 +8,7 @@ def LoginView(page):
 
     # Função para autenticar o usuário
     def autenticar_usuario(e):
+                   
         """
         Verifica se as credenciais fornecidas são válidas.
         """
@@ -18,7 +19,10 @@ def LoginView(page):
             mensagem.value = "Preencha todos os campos."
             page.update()
             return
-
+        if usuario_value == "admin" and senha_value == "admin":
+            # Credenciais de administrador
+            
+            page.go("/config")
         # Busca o usuário no banco de dados
         query = {"rf": usuario_value}
         usuario_encontrado = usuarios_db.ler(query=query)

@@ -1,22 +1,25 @@
 import flet as ft
-from bson import ObjectId  # Importe ObjectId para trabalhar com IDs do MongoDB
-from model import OcorrenciasM, AlunosM  # Importa as classes de acesso ao MongoDB
-import math  # Para verificar valores NaN
+from bson import ObjectId
+from model import OcorrenciasM, AlunosM
 
 def OcorrenciasTotaisView(page):
     # Instâncias do banco de dados
     ocorrencias_db = OcorrenciasM()
     alunos_db = AlunosM()
 
-    # Controles da interface
+    # Variável global para armazenar o dicionário de pesquisa
+    turma_pesquisa = {}
+
+    # Declaração dos controles da interface ANTES das funções
     turma_dropdown = ft.Dropdown(
         label="Turma",
-        options=[],  # Inicialmente vazio, será preenchido dinamicamente
+        options=[ft.dropdown.Option("Todos")],  # Adiciona a opção "Todos" inicialmente
     )
 
     periodo_dropdown = ft.Dropdown(
         label="Período",
         options=[
+            ft.dropdown.Option("Todos"),  # Adiciona a opção "Todos"
             ft.dropdown.Option("Manhã"),
             ft.dropdown.Option("Tarde"),
             ft.dropdown.Option("Noite"),
@@ -26,99 +29,120 @@ def OcorrenciasTotaisView(page):
     # Lista de ocorrências filtradas
     ocorrencias_list = ft.ListView(spacing=10, height=300, auto_scroll=True)
 
+    # Funções que utilizam os controles
+
     def carregar_turmas():
         """
-        Carrega as turmas únicas da coleção Alunos e preenche o Dropdown de turmas.
+        Carrega combinações únicas de Série, Turma e Ensino da coleção Alunos
+        e preenche o Dropdown de turmas.
         """
         try:
-            # Busca todos os alunos na coleção Alunos
+            # Busca todos os alunos na coleção
             alunos = alunos_db.ler()
-            print(f"Documentos encontrados na coleção Alunos: {alunos}")  # Log de debugging
 
-            # Extrai as turmas (remove duplicatas e filtra valores inválidos)
-            turmas = set()
-            for aluno in alunos:
-                turma = aluno.get("Turma")
-                if turma and not (isinstance(turma, float) and math.isnan(turma)):  # Ignora valores NaN
-                    turmas.add(turma)
+            # Cria um conjunto de combinações únicas de Série, Turma e Ensino
+            combinacoes_unicas = set(
+                (aluno.get("Série"), aluno.get("Turma"), aluno.get("Ensino"))
+                for aluno in alunos
+                if aluno.get("Série") and aluno.get("Turma") and aluno.get("Ensino")
+            )
 
-            print(f"Turmas extraídas: {turmas}")  # Log de debugging
+            # Cria um dicionário para pesquisa
+            nonlocal turma_pesquisa
+            turma_pesquisa = {
+                f"{serie} - {turma} - {ensino}": {"Série": serie, "Turma": turma, "Ensino": ensino}
+                for serie, turma, ensino in combinacoes_unicas
+            }
 
-            # Limpa as opções existentes e adiciona as novas turmas
+            # Limpa as opções existentes e adiciona as novas combinações
             turma_dropdown.options.clear()
-            if turmas:
-                for turma in sorted(turmas):  # Ordena as turmas alfabeticamente
-                    turma_dropdown.options.append(ft.dropdown.Option(turma))
-            else:
-                # Adiciona uma opção padrão se nenhuma turma for encontrada
-                turma_dropdown.options.append(ft.dropdown.Option("Nenhuma turma disponível"))
+            turma_dropdown.options.append(ft.dropdown.Option("Todos"))  # Adiciona a opção "Todos"
+            for chave in sorted(turma_pesquisa.keys()):  # Ordena alfabeticamente
+                turma_dropdown.options.append(ft.dropdown.Option(chave))
 
+            print(f"Opções de turma geradas: OK")  # Debug
             page.update()  # Atualiza a interface para refletir as mudanças
         except Exception as e:
             print(f"Erro ao carregar turmas: {e}")
 
-    def obter_dados_aluno(aluno_id):
+    def limpar_filtros(e):
         """
-        Busca os dados do aluno (nome, turma e período) no banco de dados.
-        Retorna um dicionário com os dados ou valores padrão se o aluno não for encontrado.
+        Limpa os filtros selecionados nos dropdowns e exibe todas as ocorrências.
         """
-        try:
-            # Converte o ID para ObjectId e busca o aluno
-            aluno = alunos_db.ler(query={"_id": ObjectId(aluno_id)})
-            if aluno:
-                aluno = aluno[0]  # Pega o primeiro resultado
-                turma = aluno.get("Turma", "Não informada")
-                periodo = aluno.get("Periodo", "Não informado")
+        turma_dropdown.value = "Todos"
+        periodo_dropdown.value = "Todos"
+        pesquisar_ocorrencias()  # Chama a função de pesquisa sem filtros
+        page.update()
 
-                # Trata valores NaN
-                if isinstance(turma, float) and math.isnan(turma):
-                    turma = "Não informada"
-                if isinstance(periodo, float) and math.isnan(periodo):
-                    periodo = "Não informado"
-
-                return {
-                    "nome": aluno.get("Nome", "Desconhecido"),
-                    "turma": turma,
-                    "periodo": periodo,
-                }
-        except Exception as e:
-            print(f"Erro ao buscar aluno com ID {aluno_id}: {e}")
-
-        # Retorna valores padrão se o aluno não for encontrado
-        return {
-            "nome": "Desconhecido",
-            "turma": "Não informada",
-            "periodo": "Não informado",
-        }
-
+    
     def pesquisar_ocorrencias(e):
         """
         Pesquisa ocorrências com base nos filtros de turma e período.
         Se nenhum filtro for selecionado, retorna todas as ocorrências.
         """
-        turma = turma_dropdown.value
+        turma_selecionada = turma_dropdown.value
         periodo = periodo_dropdown.value
+
+        # Obtém os filtros de Série, Turma e Ensino a partir do dicionário
+        filtros_turma = turma_pesquisa.get(turma_selecionada, {}) if turma_selecionada != "Todos" else {}
 
         # Busca todas as ocorrências
         ocorrencias = ocorrencias_db.ler()
         ocorrencias_filtradas = []
 
-        for ocorrencia in ocorrencias:
-            aluno_id = ocorrencia.get("aluno_id")  # Obtém o ID do aluno associado à ocorrência
-            if aluno_id:
-                aluno = obter_dados_aluno(aluno_id)
+        print(f"Ocorrências encontradas no banco: {len(ocorrencias)}")  # Debug
 
-                # Verifica se a ocorrência corresponde aos filtros ou se nenhum filtro foi selecionado
-                if (not turma or aluno["turma"] == turma) and (not periodo or aluno["periodo"] == periodo):
-                    ocorrencias_filtradas.append({
-                        "aluno": aluno["nome"],
-                        "turma": aluno["turma"],
-                        "periodo": aluno["periodo"],
-                        "data": ocorrencia.get("data", "Não informada"),
-                        "relatorio": ocorrencia.get("relatorio", "Não informado"),
-                        "estrategia": ocorrencia.get("estrategia", "Não informado"),
-                        "encaminhamento": ocorrencia.get("encaminhamento", "Não informado"),
-                    })
+        for ocorrencia in ocorrencias:
+            aluno_id = ocorrencia.get("aluno_id")  # Obtém o ID ou os dados do aluno associado à ocorrência
+            aluno = None
+
+            # Verifica se aluno_id é um ObjectId ou um dicionário
+            if isinstance(aluno_id, ObjectId):
+                # Busca os dados do aluno no banco de dados
+                aluno_result = alunos_db.ler({"_id": aluno_id})
+                if aluno_result:
+                    aluno = aluno_result[0]  # Assume que a busca retorna uma lista com um único aluno
+            elif isinstance(aluno_id, dict):
+                # Usa os dados do aluno diretamente
+                aluno = aluno_id
+
+            # Verifica se os dados do aluno estão disponíveis
+            if aluno is None:
+                print(f"Erro: Aluno não encontrado para a ocorrência {ocorrencia.get('data', 'desconhecida')}")  # Debug
+                continue  # Pula para a próxima ocorrência
+
+            print(f"Processando ocorrência para aluno: {aluno.get('Nome', 'Desconhecido')}")  # Debug
+
+            # Normaliza os valores para comparação
+            serie = aluno.get("Série", "").strip().lower()
+            turma = aluno.get("Turma", "").strip().lower()
+            ensino = aluno.get("Ensino", "").strip().lower()
+            periodo_aluno = aluno.get("Período", "").strip().lower()
+
+            filtro_serie = filtros_turma.get("Série", "").strip().lower()
+            filtro_turma = filtros_turma.get("Turma", "").strip().lower()
+            filtro_ensino = filtros_turma.get("Ensino", "").strip().lower()
+
+            # Verifica se a ocorrência corresponde aos filtros ou se nenhum filtro foi selecionado
+            if (
+                (not filtros_turma or (
+                    serie == filtro_serie and
+                    turma == filtro_turma and
+                    ensino == filtro_ensino
+                )) and
+                (not periodo or periodo == "Todos" or periodo_aluno == periodo.strip().lower())
+            ):
+                ocorrencias_filtradas.append({
+                    "aluno": aluno.get("Nome", "Desconhecido"),
+                    "turma": aluno.get("Turma", "Não informada"),
+                    "periodo": aluno.get("Período", "Não informado"),
+                    "data": ocorrencia.get("data", "Não informada"),
+                    "relatorio": ocorrencia.get("relatorio", "Não informado"),
+                    "estrategia": ocorrencia.get("estrategia", "Não informado"),
+                    "encaminhamento": ocorrencia.get("encaminhamento", "Não informado"),
+                })
+
+        print(f"Ocorrências filtradas: {len(ocorrencias_filtradas)}")  # Debug
 
         # Exibe os resultados na lista
         ocorrencias_list.controls.clear()
@@ -148,17 +172,18 @@ def OcorrenciasTotaisView(page):
 
         page.update()
 
-    # Botão "Pesquisar"
+    # Botões
     pesquisar_button = ft.ElevatedButton("Pesquisar", on_click=pesquisar_ocorrencias)
+    limpar_filtros_button = ft.ElevatedButton("Limpar Filtros", on_click=limpar_filtros)
 
-    # Carrega as turmas ao iniciar a tela
+    # Carrega as turmas ao inicializar
     carregar_turmas()
 
     return ft.Column([
         ft.Text("Pesquisa de Ocorrências Totais", size=24, weight=ft.FontWeight.BOLD),
         turma_dropdown,
         periodo_dropdown,
-        pesquisar_button,
+        ft.Row([pesquisar_button, limpar_filtros_button], spacing=10),
         ft.Divider(height=20, color=ft.colors.GREY_300),
         ft.Text("Resultados da Pesquisa", size=20, weight=ft.FontWeight.BOLD),
         ocorrencias_list,

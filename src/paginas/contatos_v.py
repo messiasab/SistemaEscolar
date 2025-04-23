@@ -147,7 +147,7 @@ class ContatosView:
             "link_redes": self.link_redes.value,
         }
 
-        self.contatos.create_with_aluno_id(aluno_id=self.aluno_id, data=contato_data)
+        self.contatos.cria(aluno_id=self.aluno_id, data=contato_data)
         self.carregar_contatos()  # Atualiza a lista de contatos
         self._limpar_campos()
 
