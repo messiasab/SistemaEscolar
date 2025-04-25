@@ -85,6 +85,7 @@ def AtestadoViewT(page):
                 ):
                     atestados_filtrados.append({
                         "aluno": aluno.get("Nome", "Desconhecido"),
+                        "serie": aluno.get("Série", "Não informada"),
                         "turma": aluno.get("Turma", "Não informada"),
                         "periodo": aluno.get("Período", "Não informado"),
                         "data": atestado.get("data", "Não informada"),
@@ -102,6 +103,7 @@ def AtestadoViewT(page):
                             content=ft.Column([
                                 ft.Text(f"Aluno: {atestado['aluno']}", weight=ft.FontWeight.BOLD),
                                 ft.Text(f"Turma: {atestado['turma']}"),
+                                ft.Text(f"Série: {atestado['serie']}"),
                                 ft.Text(f"Período: {atestado['periodo']}"),
                                 ft.Text(f"Data: {atestado['data']}"),
                                 ft.Text(f"Motivo: {atestado['motivo']}"),

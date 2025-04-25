@@ -39,7 +39,6 @@ class BaseCollection(ABC):
 # Implementação para MongoDB
 class MongoCollection(BaseCollection):
     def __init__(self, collection_name: str):
-        
         LINK_MONGO = env_vars.get("LINK_MONGO", "link não encontrado")
         print(f"Conectando ao MongoDB em {LINK_MONGO}...")
         client = MongoClient(
@@ -50,8 +49,11 @@ class MongoCollection(BaseCollection):
         self.collection: Collection = client["escola"][collection_name]
 
     def cria(self, data: Dict) -> str:
+        """
+        Insere um documento na coleção e retorna o ID do documento inserido.
+        """
         result = self.collection.insert_one(data)
-        return str(result.inserted_id)
+        return str(result.inserted_id)  # Retorna o ID como string
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         if projection:
@@ -74,7 +76,7 @@ class TinyDBCollection(BaseCollection):
         self.query = Query()
 
     def cria(self, data: Dict) -> str:
-        inserted_id = self.db.insert(data)
+        inserted_id = self.db.insert_one(data)
         return str(inserted_id)
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
@@ -122,11 +124,11 @@ class AlunosM:
             'Data_Nascimento', 'Data_Matrícula', 'Situação', 'Origem', 'Série',
             'TEG', 'Turma', 'Periodo', 'Ensino'
         ]
-        # Inicializa a coleção com base no tipo de banco de dados
         self.collection = get_base_collection("Alunos")
 
-    def cria(self, data: Dict) -> str:
-        return self.collection.cria(data)
+    def cria(self, aluno_id, aluno_data):
+        aluno_data["aluno_id"] = aluno_id
+        return self.collection.cria(aluno_data)  # Retorna diretamente o ID do documento inserido
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         return self.collection.ler(query, projection)
@@ -138,20 +140,17 @@ class AlunosM:
         return self.collection.apaga(query)
 
     def inicializar_campos(self):
-        """
-        Inicializa os campos da coleção Alunos.
-        """
         return self.campos
 
 
 class NotasM:
     def __init__(self):
         self.campos = ['_id', 'aluno_id', 'disciplina', 'nota', 'data']
-        # Inicializa a coleção com base no tipo de banco de dados
         self.collection = get_base_collection("Notas")
 
-    def cria(self, data: Dict) -> str:
-        return self.collection.cria(data)
+    def cria(self, aluno_id, nota_data):
+        nota_data["aluno_id"] = aluno_id
+        return self.collection.cria(nota_data)  # Retorna diretamente o ID do documento inserido
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         return self.collection.ler(query, projection)
@@ -163,20 +162,17 @@ class NotasM:
         return self.collection.apaga(query)
 
     def inicializar_campos(self):
-        """
-        Inicializa os campos da coleção Notas.
-        """
         return self.campos
 
 
 class ContatosM:
     def __init__(self):
         self.campos = ['_id', 'nome', 'telefone', 'telefone_whatsapp', 'mail', 'link_redes', 'aluno_id']
-        # Inicializa a coleção com base no tipo de banco de dados
         self.collection = get_base_collection("Contatos")
 
-    def cria(self, data: Dict) -> str:
-        return self.collection.cria(data)
+    def cria(self, aluno_id, contato_data):
+        contato_data["aluno_id"] = aluno_id
+        return self.collection.cria(contato_data)  # Retorna diretamente o ID do documento inserido
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         return self.collection.ler(query, projection)
@@ -188,23 +184,20 @@ class ContatosM:
         return self.collection.apaga(query)
 
     def inicializar_campos(self):
-        """
-        Inicializa os campos da coleção Contatos.
-        """
         return self.campos
+
 
 class AtestadosM:
     def __init__(self):
         self.campos = ['_id', 'tipo', 'data', 'numero_dias', 'conteudo', 'cid', 'observacao', 'aluno_id']
-        # Inicializa a coleção com base no tipo de banco de dados
         self.collection = get_base_collection("Atestados")
 
-    def cria(self, data: Dict) -> str:
-        return self.collection.cria(data)
+    def cria(self, aluno_id, atestado_data):
+        atestado_data["aluno_id"] = aluno_id
+        return self.collection.cria(atestado_data)  # Retorna diretamente o ID do documento inserido
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         return self.collection.ler(query, projection)
-
 
     def atualiza(self, query: Dict, update_data: Dict) -> int:
         return self.collection.atualiza(query, update_data)
@@ -213,20 +206,17 @@ class AtestadosM:
         return self.collection.apaga(query)
 
     def inicializar_campos(self):
-        """
-        Inicializa os campos da coleção Ocorrências.
-        """
         return self.campos
 
 
 class RegistrosM:
     def __init__(self):
         self.campos = ['_id', 'tipo', 'nome_responsavel', 'data', 'acao_realizada', 'observacao', 'aluno_id']
-        # Inicializa a coleção com base no tipo de banco de dados
         self.collection = get_base_collection("Registros")
 
-    def cria(self, data: Dict) -> str:
-        return self.collection.cria(data)
+    def cria(self, aluno_id, registro_data):
+        registro_data["aluno_id"] = aluno_id
+        return self.collection.cria(registro_data)  # Retorna diretamente o ID do documento inserido
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         return self.collection.ler(query, projection)
@@ -238,20 +228,17 @@ class RegistrosM:
         return self.collection.apaga(query)
 
     def inicializar_campos(self):
-        """
-        Inicializa os campos da coleção Registros.
-        """
         return self.campos
 
 
 class UsuariosM:
     def __init__(self):
         self.campos = ['_id', 'nome', 'rf', 'email', 'senha', 'tipo']
-        # Inicializa a coleção com base no tipo de banco de dados
         self.collection = get_base_collection("Usuarios")
 
-    def cria(self, data: Dict) -> str:
-        return self.collection.cria(data)
+    def cria(self, usuario_id, usuario_data):
+        usuario_data["usuario_id"] = usuario_id
+        return self.collection.cria(usuario_data)  # Retorna diretamente o ID do documento inserido
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         return self.collection.ler(query, projection)
@@ -263,9 +250,6 @@ class UsuariosM:
         return self.collection.apaga(query)
 
     def inicializar_campos(self):
-        """
-        Inicializa os campos da coleção Usuários.
-        """
         return self.campos
 
 
@@ -275,15 +259,11 @@ class OcorrenciasM:
             '_id', 'nome_responsavel', 'telefone', 'responsavel_registro',
             'rf_registro', 'data', 'relato', 'estrategia', 'encaminhamento', 'aluno_id'
         ]
-        # Inicializa a coleção com base no tipo de banco de dados
         self.collection = get_base_collection("Ocorrencias")
 
-    def cria(self, aluno_id: str, data: Dict) -> str:
-        """
-        Insere uma nova ocorrência associada a um aluno específico.
-        """
-        data['aluno_id'] = aluno_id
-        return self.collection.cria(data)
+    def cria(self, aluno_id, ocorrencia_data):
+        ocorrencia_data["aluno_id"] = aluno_id
+        return self.collection.cria(ocorrencia_data)  # Retorna diretamente o ID do documento inserido
 
     def ler(self, query: Dict = {}, projection: Optional[Dict] = None) -> List[Dict]:
         return self.collection.ler(query, projection)
@@ -295,7 +275,4 @@ class OcorrenciasM:
         return self.collection.apaga(query)
 
     def inicializar_campos(self):
-        """
-        Inicializa os campos da coleção Ocorrências.
-        """
         return self.campos

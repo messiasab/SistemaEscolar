@@ -56,7 +56,9 @@ class ContatosView:
             print("Nenhum aluno selecionado para carregar contatos.")
             return
 
-        contatos = self.contatos.ler_por_aluno(self.aluno_id)
+        # Certifique-se de que o filtro seja um dicionário válido
+        query = {"aluno_id": self.aluno_id}
+        contatos = self.contatos.ler(query)  # Passa o filtro como um dicionário
         self.lista_contatos.controls.clear()  # Limpa a lista antes de atualizar
         for contato in contatos:
             self.lista_contatos.controls.append(
@@ -147,7 +149,7 @@ class ContatosView:
             "link_redes": self.link_redes.value,
         }
 
-        self.contatos.cria(aluno_id=self.aluno_id, data=contato_data)
+        self.contatos.cria(aluno_id=self.aluno_id, contato_data=contato_data)
         self.carregar_contatos()  # Atualiza a lista de contatos
         self._limpar_campos()
 

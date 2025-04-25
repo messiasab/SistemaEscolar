@@ -4,11 +4,15 @@ from model.relat import RelatOcorrencia
 
 class OcorrenciasView:
     def __init__(self, page):
-        super().__init__()
         self.page = page
+        self.aluno_id = None  # Certifique-se de que o aluno_id seja definido
+        self.ocorrencias_db = OcorrenciasM()  # Instância do banco de dados de ocorrências
 
-       
-        
+        # Inicializa a lista de ocorrências como um controle vazio
+        self.lista_ocorrencias = ft.Column()  # Use ft.Column para armazenar as ocorrências
+
+        # Carrega as ocorrências
+        self.carregar_ocorrencias()
 
         # Recupera o ID do aluno da sessão
         self.aluno = self.page.session.get("aluno_selecionado")
@@ -20,6 +24,7 @@ class OcorrenciasView:
             self.aluno_id = self.aluno["_id"]
             self.aluno_nome = self.aluno["Nome"]
             print(f"Aluno selecionado: {self.aluno_nome}")
+            print(f"Aluno selecionado com o ID: {self.aluno_id}")
 
         # Inicializa os bancos de dados
         self.ocorrencias_db = OcorrenciasM()
@@ -28,7 +33,7 @@ class OcorrenciasView:
         self.alunos_db = AlunosM()
 
         # Recupera os contatos do aluno
-        contatos = self.contatos_db.ler_por_aluno(self.aluno_id)
+        contatos = self.contatos_db.ler({"aluno_id": self.aluno_id})
         if not contatos:
             self.page.open(ft.SnackBar(ft.Text("Nenhum Contato cadastrado para o aluno."), bgcolor=ft.colors.RED))
             self.page.update()
@@ -108,7 +113,7 @@ class OcorrenciasView:
             ]),
             ft.Divider(height=20, color=ft.colors.GREY_300),
             ft.Text("Ocorrências Cadastradas", size=20, weight=ft.FontWeight.BOLD),
-            self.ocorrencias_list,
+            self.lista_ocorrencias,
         ])
 
     def salvar_ocorrencia(self, e):
@@ -176,39 +181,43 @@ class OcorrenciasView:
         self.page.update()
 
     def carregar_ocorrencias(self):
-        """
-        Carrega e exibe as ocorrências associadas ao aluno.
-        """
-        ocorrencias = self.ocorrencias_db.ler_por_aluno(self.aluno_id)
-        self.ocorrencias_list.controls.clear()
-        if ocorrencias:
-            for ocorrencia in ocorrencias:
-                self.ocorrencias_list.controls.append(
-                    ft.Card(
-                        content=ft.Container(
-                            content=ft.Column([
-                                ft.Text(f"Responsável: {ocorrencia['nome_responsavel']}", weight=ft.FontWeight.BOLD),
-                                ft.Text(f"Telefone: {ocorrencia['telefone']}"),
-                                ft.Text(f"Data: {ocorrencia['data']}"),
-                                ft.Text(f"Relatório: {ocorrencia['relato']}"),
-                                ft.Text(f"Estratégia: {ocorrencia['estrategia']}"),
-                                ft.Text(f"Encaminhamentos: {ocorrencia['encaminhamento']}"),
-                                ft.Row([
-                                    ft.IconButton(icon=ft.icons.EDIT, tooltip="Editar", on_click=lambda e, oc=ocorrencia: self.editar_ocorrencia(oc)),
-                                    ft.IconButton(icon=ft.icons.DELETE, tooltip="Excluir", on_click=lambda e, oc_id=ocorrencia["_id"]: self.apagar_ocorrencia(oc_id)),
-                                    ft.IconButton(icon=ft.icons.PRINT, tooltip="Imprimir", on_click=lambda e, oc=ocorrencia: self.imprimir_ocorrencia(oc)),
-                                ], alignment=ft.MainAxisAlignment.END),
-                            ], spacing=5),
-                            padding=10,
-                        ),
-                        elevation=3,
-                    )
+        """Carrega as ocorrências do banco de dados e exibe usando ft.Card."""
+        if not self.aluno_id:
+            print("Nenhum aluno selecionado para carregar ocorrências.")
+            return
+
+        # Certifique-se de que o filtro seja um dicionário válido
+        query = {"aluno_id": self.aluno_id}
+        ocorrencias = self.ocorrencias_db.ler(query)  # Passa o filtro como um dicionário
+
+        if not ocorrencias:
+            print("Nenhuma ocorrência encontrada para o aluno.")
+            return
+
+        self.lista_ocorrencias.controls.clear()  # Limpa a lista antes de atualizar
+        for ocorrencia in ocorrencias:
+            self.lista_ocorrencias.controls.append(
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Text(f"Responsável: {ocorrencia.get('nome_responsavel', 'N/A')}", weight=ft.FontWeight.BOLD),
+                            ft.Text(f"Telefone: {ocorrencia.get('telefone', 'N/A')}"),
+                            ft.Text(f"Data: {ocorrencia.get('data', 'N/A')}"),
+                            ft.Text(f"Relatório: {ocorrencia.get('relato', 'N/A')}"),
+                            ft.Text(f"Estratégia: {ocorrencia.get('estrategia', 'N/A')}"),
+                            ft.Text(f"Encaminhamentos: {ocorrencia.get('encaminhamento', 'N/A')}"),
+                            ft.Row([
+                                ft.IconButton(icon=ft.icons.EDIT, tooltip="Editar", on_click=lambda e, oc=ocorrencia: self.editar_ocorrencia(oc)),
+                                ft.IconButton(icon=ft.icons.DELETE, tooltip="Excluir", on_click=lambda e, oc_id=ocorrencia["_id"]: self.apagar_ocorrencia(oc_id)),
+                                ft.IconButton(icon=ft.icons.PRINT, tooltip="Imprimir", on_click=lambda e, oc=ocorrencia: self.imprimir_ocorrencia(oc)),
+                            ], alignment=ft.MainAxisAlignment.END),
+                        ], spacing=5),
+                        padding=10,
+                    ),
+                    elevation=3,
                 )
-        else:
-            self.ocorrencias_list.controls.append(
-                ft.Text("Nenhuma ocorrência cadastrada para este aluno.", italic=True, color=ft.colors.GREY_500)
             )
-        self.page.update()
+        self.page.update()  # Atualiza a página para refletir as mudanças
 
     def editar_ocorrencia(self, ocorrencia):
         """
@@ -245,7 +254,7 @@ class OcorrenciasView:
         """
         Remove uma ocorrência do banco de dados.
         """
-        apagados = self.ocorrencias_db.apaga_por_aluno(self.aluno_id, {"_id": ocorrencia_id})
+        apagados = self.ocorrencias_db.apaga({"_id": ocorrencia_id})
         if apagados > 0:
             self.page.open(ft.SnackBar(ft.Text("Ocorrência removida com sucesso!"), bgcolor=ft.colors.GREEN)) 
         else:

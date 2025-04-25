@@ -1,6 +1,6 @@
 import flet as ft
 from model import AtestadosM
-
+from bson import ObjectId
 class AtestadosView():
     def __init__(self, page):
         super().__init__()
@@ -108,8 +108,32 @@ class AtestadosView():
         """
         Carrega e exibe os atestados associados ao aluno.
         """
-        atestados = self.atestados_db.ler_por_aluno(self.aluno_id)
+        # Certifique-se de que o aluno foi selecionado corretamente
+        if not self.aluno_id or '_id' not in self.aluno_id:
+            print("Erro: Aluno não selecionado ou ID do aluno ausente.")
+            return
+
+        aluno_id = self.aluno_id['_id']
+
+        # Verifica se o ID é uma string ou um ObjectId
+        if isinstance(aluno_id, str):
+            try:
+                aluno_id = ObjectId(aluno_id)  # Converte para ObjectId se necessário
+            except Exception:
+                pass  # Mantém como string se não for possível converter
+
+        print(f"Carregando atestados para o aluno ID: {aluno_id}")  # Debug: imprime o ID do aluno
+
+        # Tenta buscar atestados com ambos os formatos de aluno_id
+        atestados = self.atestados_db.ler({'aluno_id': aluno_id})  # Caso 1: aluno_id é um ObjectId
+        if not atestados:
+            atestados = self.atestados_db.ler({'aluno_id._id': aluno_id})  # Caso 2: aluno_id é um objeto completo
+
+        print(f"Atestados encontrados: {atestados}")  # Debug: imprime os atestados encontrados
+
+        # Limpa a lista de atestados antes de atualizar
         self.atestados_list.controls.clear()
+
         if atestados:
             for atestado in atestados:
                 self.atestados_list.controls.append(
@@ -136,6 +160,7 @@ class AtestadosView():
             self.atestados_list.controls.append(
                 ft.Text("Nenhum atestado cadastrado para este aluno.", italic=True, color=ft.colors.GREY_500)
             )
+
         self.page.update()
 
     def editar_atestado(self, atestado):
@@ -173,7 +198,7 @@ class AtestadosView():
         """
         Remove um atestado do banco de dados.
         """
-        apagados = self.atestados_db.apaga_por_aluno(self.aluno_id, {"_id": atestado_id})
+        apagados = self.atestados_db.apaga( {"_id": atestado_id})
         if apagados > 0:
             self.page.snack_bar = ft.SnackBar(ft.Text("Atestado removido com sucesso!"), bgcolor=ft.colors.GREEN)
         else:

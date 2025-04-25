@@ -95,7 +95,7 @@ class RegistroTelefonicoView:
             else:
                 self.page.snack_bar = ft.SnackBar(ft.Text("Erro ao atualizar o registro."), bgcolor=ft.colors.RED)
         else:  # Se estiver criando um novo registro
-            resultado = self.registros_db.create_with_aluno_id(self.aluno_id, registro_data)
+            resultado = self.registros_db.cria(self.aluno_id, registro_data)
             if resultado:
                 self.page.snack_bar = ft.SnackBar(ft.Text("Registro salvo com sucesso!"), bgcolor=ft.colors.GREEN)
             else:
@@ -110,7 +110,15 @@ class RegistroTelefonicoView:
         """
         Carrega e exibe os registros associados ao aluno.
         """
-        registros = self.registros_db.ler_por_aluno(self.aluno_id)
+        if not self.aluno_id:
+            print("Erro: Nenhum aluno selecionado.")
+            return
+
+        # Ajusta o filtro para buscar registros pelo ID do aluno
+        query = {"aluno_id": self.aluno_id}
+        print(f"Consulta ao banco de dados: {query}")  # Debug: imprime o filtro usado
+        registros = self.registros_db.ler(query)  # Passa o filtro como um dicionário
+
         self.registros_list.controls.clear()
         if registros:
             for registro in registros:
@@ -173,7 +181,7 @@ class RegistroTelefonicoView:
         """
         Remove um registro do banco de dados.
         """
-        apagados = self.registros_db.apaga_por_aluno(self.aluno_id, {"_id": registro_id})
+        apagados = self.registros_db.apaga( {"_id": registro_id})
         if apagados > 0:
             self.page.snack_bar = ft.SnackBar(ft.Text("Registro removido com sucesso!"), bgcolor=ft.colors.GREEN)
         else:

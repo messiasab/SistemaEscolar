@@ -114,14 +114,14 @@ def OcorrenciasTotaisView(page):
             print(f"Processando ocorrência para aluno: {aluno.get('Nome', 'Desconhecido')}")  # Debug
 
             # Normaliza os valores para comparação
-            serie = aluno.get("Série", "").strip().lower()
-            turma = aluno.get("Turma", "").strip().lower()
-            ensino = aluno.get("Ensino", "").strip().lower()
-            periodo_aluno = aluno.get("Período", "").strip().lower()
+            serie = aluno.get("Série", "Não informado").strip().lower()
+            turma = aluno.get("Turma", "Não informado").strip().lower()
+            ensino = aluno.get("Ensino", "Não informado").strip().lower()
+            periodo_aluno = aluno.get("Período", "Não informado").strip().lower()
 
-            filtro_serie = filtros_turma.get("Série", "").strip().lower()
-            filtro_turma = filtros_turma.get("Turma", "").strip().lower()
-            filtro_ensino = filtros_turma.get("Ensino", "").strip().lower()
+            filtro_serie = filtros_turma.get("Série", "Não informado").strip().lower()
+            filtro_turma = filtros_turma.get("Turma", "Não informado").strip().lower()
+            filtro_ensino = filtros_turma.get("Ensino", "Não informado").strip().lower()
 
             # Verifica se a ocorrência corresponde aos filtros ou se nenhum filtro foi selecionado
             if (
