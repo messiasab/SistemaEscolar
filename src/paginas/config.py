@@ -1,6 +1,8 @@
 import flet as ft
 from dotenv import dotenv_values, set_key
 import os
+from docx import Document
+import requests
 
 # Caminho para o arquivo .env
 ENV_FILE = ".env"
@@ -162,5 +164,76 @@ class Config:
             self.upload_frequencia_btn,
             self.upload_ocorrencia_btn,
         ], )
+
+
+class Relat:
+    def __init__(self, page):
+        self.page = page
+        self.env_vars = dotenv_values(".env")  # Carrega as variáveis do .env
+        self.template_path = ""  # Caminho do modelo local ou URL
+        self.local_template_path = "temp_template.docx"  # Caminho local temporário para o modelo
+
+    def baixar_template(self, url):
+        """
+        Baixa o arquivo do Google Drive e salva localmente.
+        """
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Verifica se houve erro na requisição
+            with open(self.local_template_path, "wb") as f:
+                f.write(response.content)
+            print(f"Template baixado com sucesso: {self.local_template_path}")
+        except Exception as ex:
+            print(f"Erro ao baixar o template: {ex}")
+            raise
+
+    def gerar_relatorio(self, output_path):
+        """
+        Gera o relatório no caminho especificado.
+        """
+        # Carrega o modelo
+        doc = Document(self.template_path)
+
+        # Substitui os placeholders pelos valores do relatório
+        for paragrafo in doc.paragraphs:
+            for chave, valor in self.report_data.items():
+                if chave in paragrafo.text:
+                    paragrafo.text = paragrafo.text.replace(chave, str(valor))
+
+        # Salva o documento no caminho especificado
+        doc.save(output_path)
+
+
+class RelatOcorrencia(Relat):
+    def __init__(self, page):
+        super().__init__(page)
+        if self.env_vars.get("DOC_WEB_URL_O") == "True":
+            self.template_path = self.local_template_path
+            self.baixar_template(self.env_vars["DOC_WEB_URL_O"])
+        else:
+            self.template_path = self.env_vars["OCORRENCIA"]
+        self.output_path = "SistemaEscolar/src/model/ModeloOcorrencia.docx"
+
+
+class RelatMatricula(Relat):
+    def __init__(self, page):
+        super().__init__(page)
+        if self.env_vars.get("DOC_WEB_URL_O") == "True":
+            self.template_path = self.local_template_path
+            self.baixar_template(self.env_vars["DOC_WEB_URL_M"])
+        else:
+            self.template_path = self.env_vars["DECLARACAO_MATRICULA"]
+        self.output_path = "SistemaEscolar/docs/DECLARACAO_MATRICULA.docx"
+
+
+class RelatFrequencia(Relat):
+    def __init__(self, page):
+        super().__init__(page)
+        if self.env_vars.get("DOC_WEB_URL_O") == "True":
+            self.template_path = self.local_template_path
+            self.baixar_template(self.env_vars["DOC_WEB_URL_F"])
+        else:
+            self.template_path = self.env_vars["DECLARACAO_FREQUENCIA"]
+        self.output_path = "SistemaEscolar/docs/DECLARACAO_FREQUENCIA.docx"
 
 

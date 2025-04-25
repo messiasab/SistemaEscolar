@@ -16,7 +16,7 @@ def main(page: ft.Page):
     # Variáveis para armazenar o nome do arquivo e o tipo de arquivo
     pasta_selecionada = ""
     tipo_arquivo = ""
-
+    print(f"Variáveis do .env: {env_vars['DOC_WEB_URL_O']}")
     # Função para alternar visibilidade com base no Switch
     def toggle_visibility(e):
         if db_nuvem.value:

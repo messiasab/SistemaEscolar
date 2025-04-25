@@ -1,10 +1,11 @@
 import flet as ft
 from docx import Document
-
+from dotenv import dotenv_values
+ENV_FILE = ".env"
 class Relat:
     def __init__(self, page):
         self.page = page
-
+        self.env_vars = dotenv_values(ENV_FILE)  # Carrega as variáveis do .env
         # Inicializa o FilePicker
         self.file_picker = ft.FilePicker(on_result=self.on_file_picker_result)
         self.template_path = ""
@@ -12,6 +13,12 @@ class Relat:
         if self.file_picker not in self.page.overlay:
                 self.page.overlay.append(self.file_picker)
                 self.page.update()  # Atualiza a página para aplicar as alterações
+        if  self.env_vars['DOC_WEB_URL_O'] == True:
+            self.template_path_m = self.env_vars['DOC_WEB_URL_M']
+            self.template_path_f = self.env_vars['DOC_WEB_URL_F']
+            self.template_path_O = self.env_vars['DOC_WEB_URL_O']
+            
+    
     def salvar_relatorio(self, report_data):
         """
         Solicita o local para salvar o relatório e gera o arquivo.
